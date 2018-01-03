@@ -2,7 +2,7 @@ try:
     from urllib.request import Request, urlopen  # Python 3
 except:
     from urllib2 import Request, urlopen  # Python 2
-import json
+import ujson as json
 
 
 def set_api_environment(environment):
@@ -38,6 +38,7 @@ class LykkexConstants(object):
 
 def _get_header(api_key):
     return {'api-key': api_key,
+            'Accept': 'application/json',
             'Content-Type': 'application/json'}
 
 
@@ -83,3 +84,12 @@ def send_limit_order(api_key, asset_pair, asset, price, order_action, volume):
          "Volume": volume, "Price": price}).encode("utf8")
     return json.loads(urlopen(Request(LykkexConstants.BASE_URL + 'Orders/limit', data,
                                       headers=_get_header(api_key))).read())
+
+
+def cancel_order(api_key, order_id):
+    result = urlopen(Request(
+        '{}Orders/{}/Cancel'.format(LykkexConstants.BASE_URL, order_id),
+        data=json.dumps({}).encode("utf8"),
+        headers=_get_header(api_key)))
+    result.read()
+    return result.getcode() in (200, )
